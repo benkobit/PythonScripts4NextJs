@@ -1,19 +1,29 @@
 import os
-import re
 import json
+from bs4 import BeautifulSoup, Tag
 
 # Lista de componentes a excluir (modificar según sea necesario)
 EXCLUDED_COMPONENTS = [
     'C8.jsx',
+    'C13.jsx',
+    'Footer.jsx',
+    'C4.jsx',
+    'Flyout.jsx',
     # Añade más componentes a excluir aquí
 ]
 
 def extract_p_tags_from_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         content = file.read()
-        # Regex to find all <p>...</p> tags
-        p_tags = re.findall(r'<p.*?>(.*?)<\/p>', content, re.DOTALL)
-        return p_tags
+        soup = BeautifulSoup(content, 'html.parser')
+        p_tags = soup.find_all('p')
+
+        extracted_data = []
+        for p_tag in p_tags:
+            inner_content = ''.join(str(e) for e in p_tag.contents if isinstance(e, (str, Tag)))
+            extracted_data.append(inner_content)
+        
+        return extracted_data
 
 def extract_p_tags_from_directory(directory_path):
     p_tags_dict = {}
